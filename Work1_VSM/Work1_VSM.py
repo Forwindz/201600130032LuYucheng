@@ -10,6 +10,7 @@ from textblob import Word
 import numpy as np
 import collections as cl
 import math
+import json
 #参考：https://juejin.im/entry/5aa34b10f265da2381553b87
 #==========================
 
@@ -45,14 +46,26 @@ def extendCount(nowCount):
     nowCount = np.concatenate((nowCount,tempVec),axis=0)
     return nowCount;
 #==========================
+#https://blog.csdn.net/henni_719/article/details/76087491
 def checkWord(word,enableSymbol):
     if len(word)<=1:
         return False
-
+    
     for char in word:
-        if not (char>='a' and char<='z' or char in enableSymbol):
+        if not ((char>='a' and char<='z')or(char>='0' and char<='9') or char in enableSymbol):
             return False;
     return True;
+#==========================
+#https://www.jianshu.com/p/b129225c661d
+def save(name,data):
+    #folder = os.path.exists(path)
+    with open(name+".json",'w') as f:
+        if type(data) in [set,list,dict]:
+            json.dump(data,f)
+        else:
+            f.write(str(data))
+    return;
+#=========================
 #nltk.download('punkt')
 #nltk.download('stopwrods')
 #nltk.download('wordnet')
@@ -67,8 +80,8 @@ files_count=len(files);
 document=-1
 wordList=[]
 wordDict={}
-#files=[files[11],files[151],files[120]]
-enableSymbol = set(['-','.','\''])
+#files=[files[41],files[151],files[120]]
+enableSymbol = set(['-','\''])
 print("Begin!")
 for file_input in files:
     document+=1
@@ -96,26 +109,26 @@ for word,times in wordDict.items():
     #if times>2:
         nowList[word]=index
         index+=1
-#print(nowList)
-document = -1
+
+print("saving...")
+save("nowList",nowList)
+save("wordDict",wordDict)
+save("wordList",wordList)
 print("size= "+str(len(files))+","+str(len(nowList)))
-nowCount = np.zeros((len(files),len(nowList)),dtype=int)
+#nowCount = np.zeros((len(files),len(nowList)),dtype=int)
+document = -1
 print("begin to compute")
 
 for articles in wordList:
     document+=1
+    nowCount = np.zeros((1,len(nowList)),dtype=int)
     if document%10==0:
         print("Computing document "+str(document)+"/"+str(files_count))
     for word in articles:
         v=nowList.get(word,-1)
         if v==-1:
             continue;
-        nowCount[document][nowList[word]]+=1
+        nowCount[0][nowList[word]]+=1
+    save("mats/"+files[document].replace('/','_'),nowCount)
 
-fout = open("outputText.txt", mode='w', encoding='utf-8',errors='ignore')
-print(nowCount)
-fout.write(str(nowList))
-fout.close()
-np.save("outputMatrix.obj",nowCount)
-np.savetxt("outputMatrixT.txt",nowCount,fmt='%d')
-f.close()
+print("Done")
