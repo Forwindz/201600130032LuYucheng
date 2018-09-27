@@ -110,10 +110,18 @@ for word,times in wordDict.items():
         nowList[word]=index
         index+=1
 
+wordExistInDoc = np.zeros((1,len(nowList)))
+for document in wordList:
+    for word,index in nowList.items():
+        if word in document:
+            wordExistInDoc[0][index] +=1
+    pass
+
 print("saving...")
 save("nowList",nowList)
 save("wordDict",wordDict)
 save("wordList",wordList)
+save("wordExistInDoc",wordExistInDoc)
 print("size= "+str(len(files))+","+str(len(nowList)))
 #nowCount = np.zeros((len(files),len(nowList)),dtype=int)
 document = -1
@@ -121,14 +129,19 @@ print("begin to compute")
 
 for articles in wordList:
     document+=1
-    nowCount = np.zeros((1,len(nowList)),dtype=int)
+    nowCount = np.zeros((1,len(nowList)))
     if document%10==0:
         print("Computing document "+str(document)+"/"+str(files_count))
     for word in articles:
         v=nowList.get(word,-1)
         if v==-1:
-            continue;
+            continue
         nowCount[0][nowList[word]]+=1
-    save("mats/"+files[document].replace('/','_'),nowCount)
+        pass
+    articleLen=len(articles)
+    tf_idf=[]
+    for i in range(len(nowList)):
+        tf_idf.append(float(nowCount[0][i])/articleLen*math.log10(files_count/wordExistInDoc[0][i]))
+    save("mats/"+files[document].replace('/','_'),tf_idf)
 
 print("Done")
