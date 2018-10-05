@@ -89,13 +89,13 @@ def getWords(files):
         print("Exist cache!")
         return (wordList,wordDict,nowList)
 
-    wordList=[]
+
     wordDict={}
     nowList = {}
     sws = stopwords.words('english')
     st = PorterStemmer()
     files_count=len(files);
-    wordList=[]
+    wordList={}
     
     enableSymbol = set(['-','\''])
 
@@ -107,7 +107,7 @@ def getWords(files):
         f = open(file_input, mode='r', encoding='utf-8',errors='ignore')
         article=f.read()
         f.close()
-        wordList.append([])
+        wordList[file_input]=[]
         for word in TextBlob(article).words:
             new_word=word.lower()
             if not checkWord(new_word,enableSymbol):
@@ -116,7 +116,7 @@ def getWords(files):
             if new_word in sws:
                 continue
             else:
-                wordList[document].append(new_word)
+                wordList[file_input].append(new_word)
                 wordDict[new_word]=1+wordDict.get(new_word,0)
 
     print("complete reading")
@@ -133,7 +133,11 @@ def getWords(files):
         else:
             removeWords.append(word)
     print("remove words...")
-    for id in range(len(wordList)):
+    listIndex=0;
+    for id in wordList.keys():
+        listIndex+=1
+        if(listIndex % 20==0):
+            print("removing..."+str(listIndex))
         temp = filter(lambda x:x not in removeWords,wordList[id])
         wordList[id]=[i for i in temp]
     print("saving...")
@@ -144,7 +148,7 @@ def getWords(files):
     save("files",files,1)
     return (wordList,wordDict,nowList);
 #=============================================
-def getTF_IDF(wordList,wordDict,nowList):
+def getTF_IDF(wordList,wordDict,nowList,files):
     print("words exist in document...")
     wordExistInDoc = np.zeros((1,len(nowList)))
     docIndex=-1
@@ -183,38 +187,29 @@ def getTF_IDF(wordList,wordDict,nowList):
         save("mats/"+files[document].replace('/','_'),tf_idf)           #tf_idf
         save("mats2/"+files[document].replace('/','_'),simple_count)    #count
     return;
-#==================================
-def getTypesInfo(files,wordList,nowList):
-    types={}
-    typeIndex=0
-    for fileName in files:
-        filesPart = fileName.split("/")
-        fileType = filesPart[1]
-        if fileType not in types.keys():
-            types[fileType]=typeIndex
-            typeIndex+=1
-    print(types)
-    #words' frequency of each type
-    count = np.zeros((len(types),len(nowList)),dtype=int)
-    for id,fileN in enumerate(files):
-        filesPart = fileN.split("/")
-        ft = types[filesPart[1]]
-        for word in wordList[id]:
-            count[ft][nowList[word]]+=1
-    print("Saving...")
-    save("TypeMatrix",count)
-    save("TypeNames",types,1)
-    return;
-#======================================================
-#nltk.download('punkt')
-#nltk.download('stopwrods')
-#nltk.download('wordnet')
-files=[]
-getAllFiles('20news-18828',files)
-#files=[files[i*100] for i in range(50)]#test only
-print("Begin!")
-wordList,wordDict,nowList = getWords(files)
-getTF_IDF(wordList,wordDict,nowList)
-getTypesInfo(files,wordList,nowList)
+#==========================
 
-print("Done")
+def mkdir(path):
+    folder = os.path.exists(path)
+    if not folder:
+        os.makedirs(path)  
+    return;
+#==========================
+def main():
+    #nltk.download('punkt')
+    #nltk.download('stopwrods')
+    #nltk.download('wordnet')
+    files=[]
+    getAllFiles('20news-18828',files)
+    #files=[files[i*100] for i in range(100)]#test only
+    print("Begin!")
+    wordList,wordDict,nowList = getWords(files)
+    mkdir("mats")
+    mkdir("mats2")
+    getTF_IDF(wordList,wordDict,nowList,files)
+
+    print("Done")
+    return;
+#============================
+if __name__=="__main__":
+    main();
