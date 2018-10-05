@@ -11,6 +11,7 @@ import numpy as np
 import collections as cl
 import math
 import json
+import pickle
 #参考：https://juejin.im/entry/5aa34b10f265da2381553b87
 #==========================
 
@@ -52,96 +53,168 @@ def checkWord(word,enableSymbol):
         return False
     
     for char in word:
-        if not ((char>='a' and char<='z')or(char>='0' and char<='9') or char in enableSymbol):
+        if not ((char>='a' and char<='z') or char in enableSymbol):
             return False;
     return True;
 #==========================
 #https://www.jianshu.com/p/b129225c661d
-def save(name,data):
-    #folder = os.path.exists(path)
-    with open(name+".json",'w') as f:
-        if type(data) in [set,list,dict]:
+def save(name,data,mode=0):
+    if(mode==1 and type(data) in [list,dict,set]):
+        with open(name+".json",'w') as f:
             json.dump(data,f)
-        else:
-            f.write(str(data))
+    else:
+        with open(name+".npy",'wb') as f:
+            pickle.dump(data,f,True)
     return;
+
+def load(name,mode=0):
+    if(mode==1):
+        if not os.path.exists(name+".json"):
+            return None
+        with open(name+".json",'r') as f:
+            data = json.load(f)
+    else:
+        if not os.path.exists(name+".npy"):
+            return None
+        with open(name+".npy",'rb') as f:
+            data = pickle.load(f)
+    return data;
 #=========================
+def getWords(files):
+
+    wordList = load("wordList",1)
+    wordDict = load("wordDict",1)
+    nowList = load("nowList",1)
+    if(wordList!=None and wordDict!=None and nowList!=None):
+        print("Exist cache!")
+        return (wordList,wordDict,nowList)
+
+    wordList=[]
+    wordDict={}
+    nowList = {}
+    sws = stopwords.words('english')
+    st = PorterStemmer()
+    files_count=len(files);
+    wordList=[]
+    
+    enableSymbol = set(['-','\''])
+
+    document=-1
+    for file_input in files:
+        document+=1
+        if document%10==0:
+            print("Reading document "+str(document)+"/"+str(files_count)+" \t"+file_input)
+        f = open(file_input, mode='r', encoding='utf-8',errors='ignore')
+        article=f.read()
+        f.close()
+        wordList.append([])
+        for word in TextBlob(article).words:
+            new_word=word.lower()
+            if not checkWord(new_word,enableSymbol):
+                continue
+            new_word = Word(st.stem(new_word)).lemmatize()
+            if new_word in sws:
+                continue
+            else:
+                wordList[document].append(new_word)
+                wordDict[new_word]=1+wordDict.get(new_word,0)
+
+    print("complete reading")
+
+    index=0
+    removeWords=[]
+    print("get words...")
+    for word,times in wordDict.items():
+        if times>2:
+            nowList[word]=index
+            index+=1
+            if index%10000==0 :
+                print("word "+str(index))
+        else:
+            removeWords.append(word)
+    print("remove words...")
+    for id in range(len(wordList)):
+        temp = filter(lambda x:x not in removeWords,wordList[id])
+        wordList[id]=[i for i in temp]
+    print("saving...")
+    #save as json to save space
+    save("nowList",nowList,1)   #use this list
+    save("wordDict",wordDict,1) #all word and exists times
+    save("wordList",wordList,1) #all word for each document
+    save("files",files,1)
+    return (wordList,wordDict,nowList);
+#=============================================
+def getTF_IDF(wordList,wordDict,nowList):
+    print("words exist in document...")
+    wordExistInDoc = np.zeros((1,len(nowList)))
+    docIndex=-1
+    for document in wordList:
+        docIndex+=1;
+        if docIndex%100==0:
+            print("Scanning words at doc \t"+str(docIndex))
+        for word,index in nowList.items():
+            if word in document:
+                wordExistInDoc[0][index] +=1
+        pass
+    files_count=len(files)
+    print("size= "+str(files_count)+","+str(len(nowList)))
+    document = -1
+    print("begin to compute")
+
+    for articles in wordList:
+        document+=1
+        nowCount = np.zeros((1,len(nowList)))
+        if document%10==0:
+            print("Computing document "+str(document)+"/"+str(files_count))
+        for word in articles:
+            v=nowList.get(word,-1)
+            if v==-1:
+                continue
+            nowCount[0][nowList[word]]+=1
+            pass
+        articleLen=len(articles)
+        tf_idf={}
+        simple_count={}
+        for i in range(len(nowList)):
+            if nowCount[0][i]>0:
+                simple_count[i]=nowCount[0][i]
+                tf_idf[i]=float(nowCount[0][i])/articleLen*math.log10(files_count/wordExistInDoc[0][i])
+        #save as npy to save space
+        save("mats/"+files[document].replace('/','_'),tf_idf)           #tf_idf
+        save("mats2/"+files[document].replace('/','_'),simple_count)    #count
+    return;
+#==================================
+def getTypesInfo(files,wordList,nowList):
+    types={}
+    typeIndex=0
+    for fileName in files:
+        filesPart = fileName.split("/")
+        fileType = filesPart[1]
+        if fileType not in types.keys():
+            types[fileType]=typeIndex
+            typeIndex+=1
+    print(types)
+    #words' frequency of each type
+    count = np.zeros((len(types),len(nowList)),dtype=int)
+    for id,fileN in enumerate(files):
+        filesPart = fileN.split("/")
+        ft = types[filesPart[1]]
+        for word in wordList[id]:
+            count[ft][nowList[word]]+=1
+    print("Saving...")
+    save("TypeMatrix",count)
+    save("TypeNames",types,1)
+    return;
+#======================================================
 #nltk.download('punkt')
 #nltk.download('stopwrods')
 #nltk.download('wordnet')
 files=[]
 getAllFiles('20news-18828',files)
-#print(s) #打印结果
-nowList = {}
-nowCount=np.zeros((1,1),dtype=int)
-sws = stopwords.words('english')
-st = PorterStemmer()
-files_count=len(files);
-document=-1
-wordList=[]
-wordDict={}
-#files=[files[41],files[151],files[120]]
-enableSymbol = set(['-','\''])
+#files=[files[i*100] for i in range(50)]#test only
 print("Begin!")
-for file_input in files:
-    document+=1
-    if document%10==0:
-        print("Reading document "+str(document)+"/"+str(files_count)+" \t"+file_input)
-    f = open(file_input, mode='r', encoding='utf-8',errors='ignore')
-    article=f.read()
-    f.close()
-    wordList.append([])
-    for word in TextBlob(article).words:
-        new_word=word.lower()
-        if not checkWord(new_word,enableSymbol):
-            continue
-        new_word = Word(st.stem(new_word)).lemmatize()
-        if new_word in sws:
-            continue
-        else:
-            wordList[document].append(new_word)
-            wordDict[new_word]=1+wordDict.get(new_word,0)
-
-print("complete reading")
-index=0
-
-for word,times in wordDict.items():
-    #if times>2:
-        nowList[word]=index
-        index+=1
-
-wordExistInDoc = np.zeros((1,len(nowList)))
-for document in wordList:
-    for word,index in nowList.items():
-        if word in document:
-            wordExistInDoc[0][index] +=1
-    pass
-
-print("saving...")
-save("nowList",nowList)
-save("wordDict",wordDict)
-save("wordList",wordList)
-save("wordExistInDoc",wordExistInDoc)
-print("size= "+str(len(files))+","+str(len(nowList)))
-#nowCount = np.zeros((len(files),len(nowList)),dtype=int)
-document = -1
-print("begin to compute")
-
-for articles in wordList:
-    document+=1
-    nowCount = np.zeros((1,len(nowList)))
-    if document%10==0:
-        print("Computing document "+str(document)+"/"+str(files_count))
-    for word in articles:
-        v=nowList.get(word,-1)
-        if v==-1:
-            continue
-        nowCount[0][nowList[word]]+=1
-        pass
-    articleLen=len(articles)
-    tf_idf=[]
-    for i in range(len(nowList)):
-        tf_idf.append(float(nowCount[0][i])/articleLen*math.log10(files_count/wordExistInDoc[0][i]))
-    save("mats/"+files[document].replace('/','_'),tf_idf)
+wordList,wordDict,nowList = getWords(files)
+getTF_IDF(wordList,wordDict,nowList)
+getTypesInfo(files,wordList,nowList)
 
 print("Done")
