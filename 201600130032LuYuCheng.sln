@@ -7,6 +7,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Work1_VSM", "Work1_VSM\Work
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Work2_NBC", "Work2_NBC\Work2_NBC.pyproj", "{8ABF13DC-8632-45DD-9C58-8A7CDAC2210E}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Work3_BRM", "Work3_BRM\Work3_BRM.pyproj", "{A5622440-2558-4E73-AC21-D44017758BEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,8 @@ Global
 		{769F3288-D3FA-484D-81F0-75A4EB103D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8ABF13DC-8632-45DD-9C58-8A7CDAC2210E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8ABF13DC-8632-45DD-9C58-8A7CDAC2210E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5622440-2558-4E73-AC21-D44017758BEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5622440-2558-4E73-AC21-D44017758BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
