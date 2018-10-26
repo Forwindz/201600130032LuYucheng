@@ -7,10 +7,11 @@
     <StartupFile>Work3_BRM.py</StartupFile>
     <SearchPath>
     </SearchPath>
-    <WorkingDirectory>.</WorkingDirectory>
+    <WorkingDirectory>../data2/</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Work3_BRM</Name>
     <RootNamespace>Work3_BRM</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +22,45 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BoolQuery\ExecuteTree.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\ExpParser\Expressions.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\ExpParser\Optimizer.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\ExpParser\TokenParser.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\ExpParser\Tokens.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\ExpParser\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\InvertIndexList.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoolQuery\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataStruct\LinkedList.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataStruct\Node.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataStruct\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Work3_BRM.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="BoolQuery\" />
+    <Folder Include="BoolQuery\ExpParser\" />
+    <Folder Include="DataStruct\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
