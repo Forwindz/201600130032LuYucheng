@@ -6,7 +6,7 @@
  -  Project files: Visual Studio 2017
  -  Python 3.5~3.6 
  -  All codes run successfully in Windows 10
- -  Library: nltk & textblob & numpy  
+ -  Library: nltk & textblob & numpy 
 
 ### Project 1 VSM
  - Pretreat documents and compute tf-idf, then store as vectors.  
@@ -17,7 +17,7 @@
  - Dataset: http://qwone.com/~jason/20Newsgroups/  
 
 ### Project 3 BRM
- - Work in progress. Inverted index and Boolean Retrieval Model.
+ - Inverted index and Boolean Retrieval Model.
  - Dataset: https://trec.nist.gov/data/microblog.html 
 
 ## About me

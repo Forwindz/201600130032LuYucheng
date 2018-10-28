@@ -55,6 +55,7 @@ class LinkedList(object):
         s='[ '
         for item in self:
             s+=str(item)+','
+        s=s.strip(',')
         return s+' ]'
 
     def __lt__(self, value):

@@ -14,9 +14,12 @@ def save(name,data,mode=0):
     if(mode==1 and type(data) in [list,dict,set]):
         with open(name+".json",'w') as f:
             json.dump(data,f)
-    else:
+    elif mode==0:
         with open(name+".npy",'wb') as f:
             pickle.dump(data,f,True)
+    elif mode==2:
+        with open(name+".txt",'w') as f:
+            f.write(str(data))
     return;
 #=========================
 def load(name,mode=0):
@@ -25,11 +28,16 @@ def load(name,mode=0):
             return None
         with open(name+".json",'r') as f:
             data = json.load(f)
-    else:
+    elif mode==0:
         if not os.path.exists(name+".npy"):
             return None
         with open(name+".npy",'rb') as f:
             data = pickle.load(f)
+    elif mode==2:
+        if not os.path.exists(name+".txt"):
+            return None
+        with open(name+".txt",'r') as f:
+            return f.readlines()
     return data;
 #========================
 def readTweets():
@@ -75,19 +83,28 @@ def getData():
     return wordDict,textContent,texts;
 #===============
 def makeList(wordDict,texts):
-    result = load("invertIndexList")
+    result = load("invertIndexList",2)
     if result is not None:
         print("use cache")
-        return result
+        ll=bq.InvertIndexList.InvertIndexList()
+        ll.loadTableFromStr(result,wordDict)
+        return ll
     iil=bq.InvertIndexList.InvertIndexList(wordDict,texts)
     print("saving...")
-    save("invertIndexList",iil)
+    save("invertIndexList",iil,2)
     return iil
 #====================
 def printDocs(list,texts):
     if list is None or len(list)==0:
         print("Found nothing")
         return
+    print("Total:\t[ "+str(len(list))+"]")
+    if len(list)>40:
+        print("print all tweets? Y/n")
+        con=input()
+        if con[0]!='Y':
+            return
+    print(list)
     for l in list:
         print(texts[l])
 
@@ -101,7 +118,6 @@ def main():
         command=input()
         r = bq.ExecuteTree.ExecuteTree.ExecuteQuery(command,iil)
         print("=====result=====")
-        print(r)
         printDocs(r,texts)
     return;
     
