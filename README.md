@@ -11,14 +11,22 @@
 ### Project 1 VSM
  - Pretreat documents and compute tf-idf, then store as vectors.  
  - Dataset: http://qwone.com/~jason/20Newsgroups/  
+ - Executing path: (SolutionDir)data/
 
 ### Project 2 NBC
  - Navie Byes Classification implementation.
  - Dataset: http://qwone.com/~jason/20Newsgroups/  
+ - Executing path: (SolutionDir)data/
 
 ### Project 3 BRM
  - Inverted index and Boolean Retrieval Model.
  - Dataset: https://trec.nist.gov/data/microblog.html 
+ - Executing path: (SolutionDir)data2/
+
+### Project 4 BM25
+ - BM25 Ranking Model
+ - Dataset: https://trec.nist.gov/data/microblog.html 
+ - Executing path: (SolutionDir)data2/
 
 ## About me
   A student from Shangdong University.  
