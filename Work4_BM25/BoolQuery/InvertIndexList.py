@@ -93,32 +93,23 @@ class InvertIndexList(object):
             s+=str(item)+'\n'
         return s
 
-    '''
-    f(query, docId) = quantity of words docId contained satisfied query condition
-    IDF(W) = log( (docs+1)/docs contains word W)
-    avdl= average doc length
-    b [0,1]
-    k ???
-    times*correction 
-    '''
 
     #return list: (score,docId)
-    def getScore(self,docList):
+    def getScore(self,docList,wordList):
         self._averageDocLength=self._totalWord/float(self._currentDocID)
         score=[]
-        #print(docList)
         for doc in docList:
-            sc=self._getSingleScore(doc,docList.getCurWeight())
+            sc=self._getSingleScore(doc,wordList)
             score.append((sc,doc))
         return sorted(score)
 
     #for each query word and satisfied documentory
-    def _getSingleScore(self,docId,weight,b=0.2,k=5):
-        return math.log(1+math.log(1+weight))/(1-b+b*self._docLength[docId]/self._averageDocLength)
-
-    def computeTFIDF(word,docId):
-        weight=self.table[self.wordDict[word]].find(docId)
-        return math.log((self._currentDocID+1)/weight)
+    def _getSingleScore(self,docId,wordList,b=0.2,k=5):
+        v=0
+        for word in wordList:
+            weight=self.table[self.wordDict[word]].find(docId)
+            v+=math.log(1+math.log(1+weight))/(1-b+b*self._docLength[docId]/self._averageDocLength)*math.log((self._currentDocID+1)/len(self.table[self.wordDict[word]]))
+        return v
 
 
 

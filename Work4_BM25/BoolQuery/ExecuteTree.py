@@ -22,7 +22,7 @@ class ExecuteTree(object):
         #try:
         abt.parse(command)
         exe = BoolQuery.ExecuteTree.ExecuteTree(abt.getRoot(),list)
-        return list.getScore(exe.compute())
+        return list.getScore(exe.compute(),abt.getWordList())
         #except:
         #    print("There might be some errors in your command.")
         #    return None

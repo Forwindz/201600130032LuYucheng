@@ -49,13 +49,21 @@ class TreeNode:
     def changeParent(self,node):
         self.parent=node
 
+    def __str_inner(self,prefix):
+        st=''
+        s1=None
+        s1=prefix+'| '
+        if self.lc is not None:
+            st+=prefix+'乚'+str(self.lc.data)
+            st+="\n"+self.lc.__str_inner(s1)
+        s1=prefix+'  '
+        if self.rc is not None:
+            st+=prefix+'乚'+str(self.rc.data)
+            st+="\n"+self.rc.__str_inner(s1)
+        return st
+
     def __str__(self):
-        st=2*self.getDepth()*' '+'||'+str(self.data)
-        if self.child is not None:
-            st+=str(len(self.child))
-            for c in self.child:
-                st+="\n"+str(c)
-        return st;
+        return str(self.data)+"\n"+self.__str_inner('');
 
     def getDepth(self):
         depth=0

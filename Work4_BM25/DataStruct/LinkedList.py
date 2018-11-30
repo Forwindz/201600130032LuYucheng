@@ -36,8 +36,8 @@ class LinkedList(object):
     #return weight
     def find(self,key):
         for v in self:
-            if v.data==key:
-                return v.weight
+            if v==key:
+                return self.getCurWeight()
         return None
 
     def getCurWeight(self):
@@ -180,9 +180,10 @@ class LinkedList(object):
             ele = heapq.heappop(a)
             if ele==result.tail:
                 result.tail.weight+=ele.weight
+                pass
             else:
                 result.appendTail(ele.data)
-                result.tail.weigght=ele.weight
+                result.tail.weight=ele.weight
             #next node
             ele=ele.next
             if ele is not None:

@@ -11,6 +11,7 @@ class Expressions:
     def __init__(self):
         self._parser=TokenParser()
         self._clear()
+        self._wordList=[]
         pass
 
     def _next(self):
@@ -41,6 +42,7 @@ class Expressions:
         while self._curToken != Tokens.End:
             self._next()
             if self._curToken==Tokens.Word:
+                self._wordList.append(self._curData)
                 self._stackWord.append(TreeNode(self._curData,child=None))
             elif Tokens.isExp(self._curToken):
                 #Get piority to decide whether to begin compute
@@ -137,6 +139,10 @@ class Expressions:
                 return node
         # other operators
         return curNode
+
+    #return a list of words which exist in query
+    def getWordList(self):
+        return self._wordList
 
 
 
