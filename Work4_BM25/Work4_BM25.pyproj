@@ -33,6 +33,8 @@
     <Compile Include="DataStruct\LinkedList.py" />
     <Compile Include="DataStruct\Node.py" />
     <Compile Include="DataStruct\__init__.py" />
+    <Compile Include="eval_hw4.py" />
+    <Compile Include="process.py" />
     <Compile Include="Work4_BM25.py" />
   </ItemGroup>
   <ItemGroup>

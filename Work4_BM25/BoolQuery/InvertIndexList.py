@@ -107,8 +107,10 @@ class InvertIndexList(object):
     def _getSingleScore(self,docId,wordList,b=0.2,k=5):
         v=0
         for word in wordList:
-            weight=self.table[self.wordDict[word]].find(docId)
-            v+=math.log(1+math.log(1+weight))/(1-b+b*self._docLength[docId]/self._averageDocLength)*math.log((self._currentDocID+1)/len(self.table[self.wordDict[word]]))
+            weight=self.table[self.wordDict.get(word,0)].find(docId)
+            if weight is None:
+                weight=0
+            v+=math.log(1+math.log(1+weight))/(1-b+b*self._docLength[docId]/self._averageDocLength)*math.log((self._currentDocID+1)/len(self.table[self.wordDict.get(word,0)]))
         return v
 
 

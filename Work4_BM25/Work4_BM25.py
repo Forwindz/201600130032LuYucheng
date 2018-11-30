@@ -8,6 +8,7 @@ import pickle
 import random
 import DataStruct
 import BoolQuery as bq
+from nltk.corpus import stopwords
 
 #==========================
 def save(name,data,mode=0):
@@ -44,24 +45,26 @@ def readTweets():
     f = open("tweets.json")
     lines = f.readlines()
     texts = []
+    ids=[]
     for line in lines:
         tempObj = json.loads(line)
         texts.append(tempObj['text'])
-    return texts;
+        ids.append(tempObj['tweetId'])
+    return texts,ids;
 #=========================
 def getData():
     # read files
-    texts=readTweets()
+    texts,ids=readTweets()
     result = load("textContent",1)
     result2 = load("wordDict",1)
     if(result is not None and result2 is not None):
         print("use cache")
-        return result2,result,texts;#wordDict,textContent,texts
+        return result2,result,texts,ids;#wordDict,textContent,texts
     print("Get words... Doc ="+str(len(texts)))
     textContent=[]
     wordSet = set([])
     for text in texts:
-        words=TextBlob(text).words
+        words=TextBlob(text.replace('-',' ')).words
         realWord=[]
         for word in words:
             if word.isalpha():
@@ -80,7 +83,7 @@ def getData():
     print("saving...")
     save("wordDict",wordDict,1)
     save("textContent",textContent,1)
-    return wordDict,textContent,texts;
+    return wordDict,textContent,texts,ids;
 #===============
 def makeList(wordDict,texts):
     result = load("invertIndexList",2)
@@ -107,9 +110,34 @@ def printDocs(list,texts):
     #print(list)
     for l in reversed(list):
         print(str(l[0])+" score\t"+str(texts[l[1]]))
-
+#===================
+def readQuery(filePath):
+    lines=load(filePath,2)
+    query=[]
+    qid=[]
+    for line in lines:
+        if len(line)>10 and line[0]=='<' and line[6]=='>':
+            query.append(line.replace("<query>","").replace("</query>","").strip("\n "))
+        elif len(line)>10 and line[0]=='<' and line[1]=='n':
+            qid.append(int(line.replace("<num> Number: MB","").replace(" </num>","").strip("\n ")))
+    return query,qid
+#=================
+def preprocessInput(s):
+    result=''
+    for ch in s.lower():
+        if ch>='a' and ch<='z' or ch==' ':
+            result+=ch
+    words=TextBlob(result).words
+    sp=set(stopwords.words('english'))
+    result=''
+    for word in words:
+        if word not in sp:
+            result+=word+" "
+            
+    return result.strip();
+#=================
 def main():
-    wordDict,textWordList,texts=getData()
+    wordDict,textWordList,texts,textids=getData()
     print("Processing...")
     iil=makeList(wordDict,textWordList)
     while True:
@@ -120,7 +148,22 @@ def main():
         print("=====result=====")
         printDocs(r,texts)
     return;
-    
+
+def queryTest():
+    wordDict,textWordList,texts,textids=getData()
+    print("Processing...")
+    iil=makeList(wordDict,textWordList)
+    q,qid = readQuery("query")
+    s=""    #result string
+    for i,qstr in enumerate(q):
+        qp = preprocessInput(qstr)
+        ans = bq.ExecuteTree.ExecuteTree.ExecuteQuery(qp,iil)
+        print(">"+str(qid[i])+"Search ["+qp+"], Result : "+str(len(ans)))
+        for doc in ans:
+            s+=str(qid[i])+" "+str(textids[doc[1]])+"\n"
+    print("saving results..")
+    save("query_result",s,2)
 
 if __name__=="__main__":
-    main()
+    #main()
+    queryTest()
