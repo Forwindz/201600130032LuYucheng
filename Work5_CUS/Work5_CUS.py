@@ -19,6 +19,8 @@ from sklearn.mixture import GaussianMixture
 from sklearn.datasets import load_digits
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
+from sklearn.feature_extraction.text import TfidfVectorizer;
+from sklearn.feature_extraction.text import *;
 
 #==========================
 def save(name,data,mode=0):
@@ -106,30 +108,57 @@ def procDocs():
     save("lable",label);
     return data,label;
 
+def tfidf():
+    data,label = readTweets()
+    t=sklearn.feature_extraction.text.TfidfVectorizer()
+    return t.fit_transform(data),label
+
 if __name__=="__main__":
-    data,label=procDocs();
+    #tfidf() input tfidf values
+    #procDocs() input word frequency values
+    data,label=tfidf()#procDocs()
     print("Data Shape:"+str(data.shape))
     def estimate(name,esti):
         t0=time()
         esti.fit(data)
         print("%-15s\t%.2fs\t%.3f"%(name,time()-t0,
                                        metrics.normalized_mutual_info_score(label,esti.labels_,average_method='arithmetic')))
+    def estimate_dense(name,esti):
+        t0=time()
+        esti.fit(data.todense())
+        print("%-15s\t%.2fs\t%.3f"%(name,time()-t0,
+                                       metrics.normalized_mutual_info_score(label,esti.labels_,average_method='arithmetic')))
+    def estimate_(name,esti):
+        t0=time()
+        esti.fit_predict(data.todense(),label)
+        print("%-15s\t%.2fs\t%.3f"%(name,time()-t0,
+                                       metrics.normalized_mutual_info_score(label,esti.predict(data.todense()),average_method='arithmetic')))
 
     print("name    \ttime  \t score")
     print("_"*40)
+    
+    
+    estimate_dense("Agg ward",AgglomerativeClustering(n_clusters=max(label),linkage="ward"))
+    estimate_dense("Agg complete",AgglomerativeClustering(n_clusters=max(label),linkage="complete"))
+    estimate_dense("Agg average",AgglomerativeClustering(n_clusters=max(label),linkage="average"))
+    estimate_dense("Agg single",AgglomerativeClustering(n_clusters=max(label),linkage="single"))
+    
+    estimate("Specutal C1",SpectralClustering(n_clusters=max(label),gamma=1,affinity='rbf'))
+    estimate("Specutal C1.5",SpectralClustering(n_clusters=max(label),gamma=1.5,affinity='rbf'))
+    estimate("Specutal C0.5",SpectralClustering(n_clusters=max(label),gamma=0.5,affinity='rbf'))
+    estimate("DBSCAN2",DBSCAN(eps=2.0))
+    estimate("DBSCAN1.5",DBSCAN(eps=1.5))
+    estimate("DBSCAN1",DBSCAN(eps=1.0))
+    estimate("DBSCAN0.5",DBSCAN(eps=0.5))
+    
     estimate("K-means_++",KMeans(init='k-means++', n_clusters=max(label), n_init=10))
     estimate("K-means_ran",KMeans(init='random', n_clusters=max(label), n_init=10))
     estimate("Affinty P",AffinityPropagation())
-    estimate("MeanShift F",MeanShift(bin_seeding=False))
-    estimate("MeanShift T",MeanShift(bin_seeding=True))
-    estimate("Specutal C",SpectralClustering(n_clusters=max(label)))
-    #estimate("Ward HC",sklearn.cluster.Ward(n_clusters=max(label)))
-    estimate("Agg ward",AgglomerativeClustering(n_clusters=max(label),linkage="ward"))
-    estimate("Agg complete",AgglomerativeClustering(n_clusters=max(label),linkage="complete"))
-    estimate("Agg average",AgglomerativeClustering(n_clusters=max(label),linkage="average"))
-    estimate("Agg single",AgglomerativeClustering(n_clusters=max(label),linkage="single"))
-    estimate("DBSCAN",DBSCAN())
-    #estimate("Gaussian M",GaussianMixture())
+    estimate_dense("MeanShift F",MeanShift(bin_seeding=False))
+    estimate_dense("MeanShift T",MeanShift(bin_seeding=True))
+    estimate_("Gaussian M",GaussianMixture(max_iter=500))
+    
+    
 
         
 
