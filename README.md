@@ -28,6 +28,9 @@
  - Dataset: https://trec.nist.gov/data/microblog.html 
  - Executing path: (SolutionDir)data2/
 
+### Project 5 Clustering
+ - a series of clustering methods
+
 ## About me
   A student from Shangdong University.  
   
